@@ -10,7 +10,7 @@ RUN mvn clean package
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 # Copy JAR from previous stage
-COPY --from=build /app/target/server-discovery-*.jar app.jar
+COPY --from=build /app/target/user-service-*.jar app.jar
 # Expose default port of Spring Boot
 EXPOSE 9081
 # Command to execute the microservice

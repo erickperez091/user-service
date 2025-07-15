@@ -20,7 +20,7 @@ pipeline {
                 echo "Cloning branch ${params.BRANCH_NAME}"
                 checkout([$class: 'GitSCM',
                           branches: [[name: "*/${params.BRANCH_NAME}"]],
-                          userRemoteConfigs: [[url: 'https://github.com/erickperez091/inventory-server-gateway.git']]])
+                          userRemoteConfigs: [[url: 'https://github.com/erickperez091/user-service.git']]])
             }
         }
 
@@ -45,13 +45,13 @@ pipeline {
                     credentialsId: 'nexus-creds', // Asegúrate que existe en Jenkins
                     artifacts: [
                         [
-                            artifactId: 'server-gateway',
+                            artifactId: 'user-service',
                             classifier: '',
-                            file: "target/server-gateway-${params.VERSION}.jar",
+                            file: "target/user-service-${params.VERSION}.jar",
                             type: 'jar'
                         ],
                         [
-                            artifactId: 'server-gateway',
+                            artifactId: 'user-service',
                             classifier: '',
                             file: 'pom.xml',
                             type: 'pom'
