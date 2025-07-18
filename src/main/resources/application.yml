@@ -1,5 +1,5 @@
 server:
-  port: 9080
+  port: 9082
 spring:
   application:
     name: user-service
@@ -18,8 +18,10 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST:localhost:9092}
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${SERVER_DISCOVERY:http://localhost:8761/eureka}
