@@ -6,7 +6,7 @@ pipeline {
         string(name: 'VERSION', defaultValue: '1.0.1', description: 'Artifact version')
     }
 
-/*     tools {
+    /* tools {
         jdk 'JDK24'
     } */
 
@@ -42,7 +42,7 @@ pipeline {
                     groupId: 'com.example',
                     version: "${params.VERSION}",
                     repository: 'maven-test-releases',
-                    credentialsId: 'nexus-creds', // Asegúrate que existe en Jenkins
+                    credentialsId: 'nexus-creds', // Asegúrate de que exista en Jenkins
                     artifacts: [
                         [
                             artifactId: 'user-service',
@@ -60,9 +60,9 @@ pipeline {
                 )
             }
         }
-        post {
-            success { echo 'user-service published successfully' }
-            failure { echo 'error publishing user-service'}
-        }
+    }
+    post {
+        success { echo 'user-service published successfully' }
+        failure { echo 'Error publishing user-service' }
     }
 }
