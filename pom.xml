@@ -27,6 +27,7 @@
         <native.maven.plugin.version>0.10.4</native.maven.plugin.version>
         <spring.boot.maven.plugin.version>3.4.5</spring.boot.maven.plugin.version>
         <jjwt.version>0.11.5</jjwt.version>
+        <commons.lib.version>1.0.1</commons.lib.version>
     </properties>
 
     <dependencies>
@@ -49,7 +50,7 @@
         <dependency>
             <groupId>com.example</groupId>
             <artifactId>commons-lib</artifactId>
-            <version>1.0.1</version>
+            <version>${commons.lib.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
