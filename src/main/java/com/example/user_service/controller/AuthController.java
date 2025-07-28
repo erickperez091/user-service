@@ -1,5 +1,6 @@
 package com.example.user_service.controller;
 
+import com.example.user_service.dto.TokenResponseDTO;
 import com.example.user_service.dto.UserDTO;
 import com.example.user_service.services.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -26,16 +27,16 @@ public class AuthController {
     }
 
     @PostMapping(name = "Login", value = "/login", path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> login(@RequestBody UserDTO userDTO) {
-        String token = this.authService.login(userDTO.getUsername(), userDTO.getPassword());
-        return new ResponseEntity<>(token, HttpStatus.OK);
+    public ResponseEntity<TokenResponseDTO> login(@RequestBody UserDTO userDTO) {
+        TokenResponseDTO responseDTO = this.authService.login(userDTO.getUsername(), userDTO.getPassword());
+        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
     @PostMapping(name = "Refresh Token", value = "/refresh-token", path = "/refresh-token", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> refreshToken(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<TokenResponseDTO> refreshToken(@RequestHeader("Authorization") String token) {
         String tokenAux = token.substring(7);
-        String newToken = this.authService.refreshToken(tokenAux);
-        return new ResponseEntity<>(newToken, HttpStatus.OK);
+        TokenResponseDTO responseDTO = this.authService.refreshToken(tokenAux);
+        return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
 }

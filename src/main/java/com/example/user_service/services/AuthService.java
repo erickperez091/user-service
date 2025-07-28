@@ -1,6 +1,7 @@
 package com.example.user_service.services;
 
 import com.example.common.utilities.JwtUtils;
+import com.example.user_service.dto.TokenResponseDTO;
 import com.example.user_service.dto.UserDTO;
 import com.example.user_service.entity.RoleEnum;
 import com.example.user_service.entity.User;
@@ -40,7 +41,7 @@ public class AuthService {
         return userDTO;
     }
 
-    public String login(String username, String password) {
+    public TokenResponseDTO login(String username, String password) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -48,19 +49,18 @@ public class AuthService {
             throw new BadCredentialsException("Incorrect password");
         }
 
-        return jwtUtils.generateToken(username, Map.of("role", user.getRole()));
+        return new TokenResponseDTO(jwtUtils.generateToken(username, Map.of("role", user.getRole())));
     }
 
 
-
-    public String refreshToken(String token) {
+    public TokenResponseDTO refreshToken(String token) {
         String username = jwtUtils.getUsername(token);
         Optional<User> optionalUser = userRepository.findByUsername(username);
         final StringBuilder refreshToken = new StringBuilder();
         optionalUser.ifPresent(user -> {
             refreshToken.append(jwtUtils.generateToken(username, Map.of("role", user.getRole())));
         });
-        return refreshToken.toString();
+        return new TokenResponseDTO(refreshToken.toString());
     }
 
     /*private final UserRepository userRepository;
