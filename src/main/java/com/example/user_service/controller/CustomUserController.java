@@ -1,5 +1,6 @@
 package com.example.user_service.controller;
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/user/v1")
+@Log4j2
 public class CustomUserController {
 
     @GetMapping(name = "Admin Endpoint", value = "/admin", path = "/admin", produces = MediaType.APPLICATION_JSON_VALUE)
