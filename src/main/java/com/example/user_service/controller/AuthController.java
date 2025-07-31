@@ -1,10 +1,14 @@
 package com.example.user_service.controller;
 
+import com.example.common.service.RedisService;
+import com.example.user_service.dto.LoginAttemptDTO;
 import com.example.user_service.dto.TokenResponseDTO;
 import com.example.user_service.dto.UserDTO;
 import com.example.user_service.services.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 public class AuthController {
 
+    @Value("${security.internal.api.key}")
+    private String key;
+
     private final AuthService authService;
-    private final RedisBlackListService redisBlackListService;
 
     @PostMapping(name = "Sign Up", value = "/signup", path = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDTO> signup(@RequestBody UserDTO userDTO) {
@@ -30,8 +36,8 @@ public class AuthController {
     }
 
     @PostMapping(name = "Login", value = "/login", path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TokenResponseDTO> login(@RequestBody UserDTO userDTO) {
-        TokenResponseDTO responseDTO = this.authService.login(userDTO.getUsername(), userDTO.getPassword());
+    public ResponseEntity<TokenResponseDTO> login(@RequestBody UserDTO userDTO, HttpServletRequest request) {
+        TokenResponseDTO responseDTO = this.authService.login(userDTO.getUsername(), userDTO.getPassword(), request);
         return new ResponseEntity<>(responseDTO, HttpStatus.OK);
     }
 
@@ -44,8 +50,17 @@ public class AuthController {
 
     @PostMapping(name = "Logout", value = "/logout", path = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String token) {
-        String tokenAux = token.substring(7);
-        this.redisBlackListService.addTokenToBlackList(tokenAux);
+        this.authService.logout(token);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping(name = "Login Attempt", value = "/login-attempt", path = "/login-attempt", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> loginAttempt(@RequestHeader("X-Internal-Key") String internalKey, @RequestBody LoginAttemptDTO loginAttemptDTO) {
+        logger.info("[AuthController][loginAttempt][Start] Internal Api Key {}", internalKey);
+        if (!key.equals(internalKey)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        this.authService.updateLoginAttempt(loginAttemptDTO);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

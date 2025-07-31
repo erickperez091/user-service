@@ -1,0 +1,46 @@
+package com.example.user_service.controller.exception;
+
+import com.example.user_service.exception.SessionAlreadyActiveException;
+import com.example.user_service.services.LoginAttemptService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Map;
+
+@RestControllerAdvice
+@Log4j2
+@RequiredArgsConstructor
+public class GlobalExceptionHandler {
+
+    private final LoginAttemptService LoginAttemptService;
+
+    @ExceptionHandler(SessionAlreadyActiveException.class)
+    public ResponseEntity<?> handleSessionAlreadyActive(SessionAlreadyActiveException ex) {
+        String message = ex.getMessage();
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("error", message));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<?> handleBadCredentials(BadCredentialsException ex, HttpServletRequest request) {
+        String username = (String) request.getAttribute("username");
+        this.LoginAttemptService.callUpdateLogingAttempt(username);
+        logger.error("[GlobalExceptionHandler][handleBadCredentials][Start]: Invalid Credentials for User: {}", username);
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(Map.of("error", "Incorrect password"));
+    }
+}

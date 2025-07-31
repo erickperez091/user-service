@@ -20,6 +20,10 @@ spring:
       matching-strategy: ant_path_matcher
   kafka:
     bootstrap-servers: ${KAFKA_HOST:localhost:9092}
+  data:
+    redis:
+      port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST:localhost}
 
 enable:
   kafka: ${ENABLE_KAFKA:false}
@@ -29,14 +33,33 @@ eureka:
     service-url:
       defaultZone: ${SERVER_DISCOVERY:http://localhost:8761/eureka}
 
-security:
-  enabled: ${SECURITY_ENABLED:false}
-  public:
-    url: "/auth/v1/**"
-
 jwt:
   secret: ${JWT_SECRET}
   expiration: 300000
+
+security:
+  enabled: ${SECURITY_ENABLED:false}
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: 300000
+  public:
+    url: "/auth/v1/**"
+  internal:
+    api:
+      key: ${SECURITY_INTERNAL_API_KEY:e8Jh1Ejk2gFv4nKz6Yf8WvLtBqZo0v+z0lLh9cPeqvU=}
+  max:
+    attempts: ${MAX_ATTEMPTS:3}
+
+auth:
+  service:
+    name: user-service
+    base-url: auth/v1
+    login-attempt-url: /login-attempt
+
+service:
+  general:
+    protocol: http://
+
 
 logging:
   level:

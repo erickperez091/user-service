@@ -2,8 +2,6 @@ package com.example.user_service.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -12,12 +10,13 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
-@Table(name = "users")
+@Table(name = "login_attempt")
 @DynamicUpdate
-public class User {
+public class LoginAttempt {
+
     @Id
     @Column(name = "id")
     private String id;
@@ -25,10 +24,6 @@ public class User {
     @Column(name = "username", unique = true)
     private String username;
 
-    @Column(name = "password", unique = true)
-    private String password;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role")
-    private RoleEnum role;
+    @Column(name = "attempts")
+    private int attempts;
 }
