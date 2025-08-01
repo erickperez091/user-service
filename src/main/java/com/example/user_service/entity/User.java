@@ -28,6 +28,9 @@ public class User {
     @Column(name = "password", unique = true)
     private String password;
 
+    @Column(name = "accountNonLocked", columnDefinition = "boolean default true")
+    private boolean accountNonLocked;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private RoleEnum role;

@@ -13,7 +13,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,6 +38,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final RedisService redisService;
     private final LoginAttemptService loginAttemptService;
+    private final AuthenticationManager authenticationManager;
 
     public UserDTO signup(UserDTO userDTO) {
         Optional<User> optionalUser = userRepository.findByUsername(userDTO.getUsername());
@@ -52,23 +58,25 @@ public class AuthService {
 
     public TokenResponseDTO login(String username, String password, HttpServletRequest request) {
 
-        String isSessionActive = this.redisService.isSessionActive(username);
-        if(Objects.nonNull(isSessionActive) && !this.redisService.isTokenInBlackList(isSessionActive)){
-            throw new SessionAlreadyActiveException("Session is active");
-        }
-
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
+        try {
+            Authentication auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, password)
+            );
+            String isSessionActive = this.redisService.isSessionActive(username);
+            if (Objects.nonNull(isSessionActive) && !this.redisService.isTokenInBlackList(isSessionActive)) {
+                throw new SessionAlreadyActiveException("Session is active");
+            }
+            String role = auth.getAuthorities().stream()
+                    .findFirst()
+                    .map(GrantedAuthority::getAuthority)
+                    .orElse("USER");
+            String token = jwtUtils.generateToken(username, Map.of("role", role));
+            redisService.storeActiveToken(username, token);
+            return new TokenResponseDTO(token);
+        } catch (BadCredentialsException | LockedException ex) {
             request.setAttribute("username", username);
-            throw new BadCredentialsException("Incorrect password");
+            throw ex;
         }
-
-        String token = jwtUtils.generateToken(username, Map.of("role", user.getRole()));
-        redisService.storeActiveToken(username, token);
-
-        return new TokenResponseDTO(token);
     }
 
     public TokenResponseDTO refreshToken(String token) {

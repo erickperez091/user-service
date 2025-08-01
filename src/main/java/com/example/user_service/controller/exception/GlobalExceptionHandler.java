@@ -12,6 +12,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -39,8 +40,19 @@ public class GlobalExceptionHandler {
         String username = (String) request.getAttribute("username");
         this.LoginAttemptService.callUpdateLogingAttempt(username);
         logger.error("[GlobalExceptionHandler][handleBadCredentials][Start]: Invalid Credentials for User: {}", username);
+        String message = String.format("Invalid Credentials for User: [%s]", username);
         return ResponseEntity
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(Map.of("error", "Incorrect password"));
+                .body(Map.of("error", message));
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<?> handleLockedAccount(LockedException ex, HttpServletRequest request) {
+        String username = (String) request.getAttribute("username");
+        logger.error("[GlobalExceptionHandler][handleLockedAccount][Start]: User Account Locked: {}", username);
+        String message = String.format("User account: [%s] is locked", username);
+        return ResponseEntity
+                .status(HttpStatus.LOCKED)
+                .body(Map.of("error", message));
     }
 }

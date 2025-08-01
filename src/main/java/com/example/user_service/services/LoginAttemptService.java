@@ -92,7 +92,9 @@ public class LoginAttemptService {
             if (loginAttempt.getAttempts() >= this.maxAttempts) {
                 Optional<com.example.user_service.entity.User> userOptional = this.userRepository.findByUsername(loginAttemptDTO.username());
                 userOptional.ifPresent(user -> {
-                    // TODO lock user
+                    user.setAccountNonLocked(false);
+                    this.userRepository.save(user);
+                    this.loginAttemptRepository.deleteById(loginAttempt.getId());
                 });
             }
         }, () -> {

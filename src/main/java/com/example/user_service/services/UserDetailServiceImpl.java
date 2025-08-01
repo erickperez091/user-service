@@ -22,9 +22,8 @@ public class UserDetailServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> optionalUser = userRepository.findByUsername(username);
 
-
         return optionalUser
-                .map(userEntity -> new org.springframework.security.core.userdetails.User(userEntity.getUsername(), userEntity.getPassword(), List.of(new SimpleGrantedAuthority("ROLE_" + userEntity.getRole().name()))))
+                .map(userEntity -> new org.springframework.security.core.userdetails.User(userEntity.getUsername(), userEntity.getPassword(), true, true, true, userEntity.isAccountNonLocked(), List.of(new SimpleGrantedAuthority(userEntity.getRole().name()))))
                 .orElseThrow(() -> new UsernameNotFoundException("Username not found"));
     }
 }
