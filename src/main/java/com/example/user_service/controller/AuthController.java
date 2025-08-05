@@ -1,6 +1,5 @@
 package com.example.user_service.controller;
 
-import com.example.common.service.RedisService;
 import com.example.user_service.dto.LoginAttemptDTO;
 import com.example.user_service.dto.TokenResponseDTO;
 import com.example.user_service.dto.UserDTO;
@@ -24,10 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 public class AuthController {
 
+    private final AuthService authService;
     @Value("${security.internal.api.key}")
     private String key;
-
-    private final AuthService authService;
 
     @PostMapping(name = "Sign Up", value = "/signup", path = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDTO> signup(@RequestBody UserDTO userDTO) {

@@ -2,10 +2,6 @@ package com.example.user_service.controller.exception;
 
 import com.example.user_service.exception.SessionAlreadyActiveException;
 import com.example.user_service.services.LoginAttemptService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -16,8 +12,6 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.Map;
 
 @RestControllerAdvice

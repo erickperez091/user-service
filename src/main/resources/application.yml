@@ -60,6 +60,9 @@ service:
   general:
     protocol: http://
 
+cache:
+  enabled: ${CACHE_ENABLED:true}
+  provider: ${CACHE_PROVIDER:memcached}
 
 logging:
   level:

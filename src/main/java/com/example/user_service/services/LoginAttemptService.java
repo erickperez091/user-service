@@ -13,11 +13,9 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.Request;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.util.Optional;
@@ -49,6 +47,8 @@ public class LoginAttemptService {
 
     @Value("${security.internal.api.key}")
     private String internalKey;
+    @Value("${security.max.attempts}")
+    private int maxAttempts;
 
     @PostConstruct
     private void init() {
@@ -67,9 +67,6 @@ public class LoginAttemptService {
                 .filter(WebClientFilter.logRequest())
                 .build();
     }
-
-    @Value("${security.max.attempts}")
-    private int maxAttempts;
 
     public void callUpdateLogingAttempt(String username) {
         LoginAttemptDTO loginAttemptDTO = new LoginAttemptDTO(username);

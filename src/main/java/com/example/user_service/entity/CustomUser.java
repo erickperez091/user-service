@@ -16,7 +16,7 @@ public class CustomUser implements UserDetails {
     private String id;
     @Column(name = "username", unique = true)
     private String username;
-    private Collection< Role > authorities;
+    private Collection<Role> authorities;
     @Column
     private boolean accountNonExpired;
     @Column
@@ -26,8 +26,12 @@ public class CustomUser implements UserDetails {
     @Column
     private boolean enabled;
 
+    public CustomUser(String username, String password, Collection<? extends GrantedAuthority> authorities) {
+        super();
+    }
+
     @Override
-    public Collection< ? extends GrantedAuthority > getAuthorities() {
+    public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
     }
 
@@ -59,9 +63,5 @@ public class CustomUser implements UserDetails {
     @Override
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
-    }
-
-    public CustomUser( String username, String password, Collection< ? extends GrantedAuthority > authorities ) {
-        super();
     }
 }

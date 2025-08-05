@@ -1,6 +1,6 @@
 package com.example.user_service.services;
 
-import com.example.common.service.RedisService;
+import com.example.common.service.CacheService;
 import com.example.common.utilities.JwtUtils;
 import com.example.user_service.dto.LoginAttemptDTO;
 import com.example.user_service.dto.TokenResponseDTO;
@@ -19,7 +19,6 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +35,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
-    private final RedisService redisService;
+    private final CacheService cacheService;
     private final LoginAttemptService loginAttemptService;
     private final AuthenticationManager authenticationManager;
 
@@ -62,8 +61,8 @@ public class AuthService {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password)
             );
-            String isSessionActive = this.redisService.isSessionActive(username);
-            if (Objects.nonNull(isSessionActive) && !this.redisService.isTokenInBlackList(isSessionActive)) {
+            String isSessionActive = this.cacheService.isSessionActive(username);
+            if (Objects.nonNull(isSessionActive) && !this.cacheService.isTokenInBlackList(isSessionActive)) {
                 throw new SessionAlreadyActiveException("Session is active");
             }
             String role = auth.getAuthorities().stream()
@@ -71,7 +70,7 @@ public class AuthService {
                     .map(GrantedAuthority::getAuthority)
                     .orElse("USER");
             String token = jwtUtils.generateToken(username, Map.of("role", role));
-            redisService.storeActiveToken(username, token);
+            cacheService.storeActiveToken(username, token);
             return new TokenResponseDTO(token);
         } catch (BadCredentialsException | LockedException ex) {
             request.setAttribute("username", username);
@@ -91,7 +90,7 @@ public class AuthService {
 
     public void logout(String token) {
         String tokenAux = token.substring(7);
-        this.redisService.addTokenToBlackList(tokenAux);
+        this.cacheService.addTokenToBlackList(tokenAux);
     }
 
     public void updateLoginAttempt(LoginAttemptDTO loginAttemptDTO) {
