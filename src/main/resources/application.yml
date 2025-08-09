@@ -25,8 +25,20 @@ spring:
       port: ${REDIS_PORT:6379}
       host: ${REDIS_HOST:localhost}
 
-enable:
-  kafka: ${ENABLE_KAFKA:false}
+messaging:
+  provider: ${MESSAGING_PROVIDER:kinesis}
+  kafka:
+    client-id: ${KAFKA_CLIENT_ID:user-service}
+    topic: ${KAFKA_TOPIC:user}
+    group-id: ${KAFKA_GROUP_ID:user-service}
+    max-poll-records: ${KAFKA_MAX_POLL_RECORDS:1}
+  kinesis:
+    stream-name: ${KINESIS_STREAM_NAME:user}
+    region: ${KINESIS_REGION:us-east-1}
+    endpoint-override: ${ENDPOINT_OVERRIDE:http://localhost:4566}
+    async-native: ${KINESIS_ASYNC:false}
+
+
 
 eureka:
   client:

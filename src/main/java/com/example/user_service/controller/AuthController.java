@@ -4,6 +4,7 @@ import com.example.user_service.dto.LoginAttemptDTO;
 import com.example.user_service.dto.TokenResponseDTO;
 import com.example.user_service.dto.UserDTO;
 import com.example.user_service.services.AuthService;
+import com.example.user_service.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,12 +25,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
     @Value("${security.internal.api.key}")
     private String key;
 
     @PostMapping(name = "Sign Up", value = "/signup", path = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDTO> signup(@RequestBody UserDTO userDTO) {
-        UserDTO userDTOResponse = this.authService.signup(userDTO);
+        UserDTO userDTOResponse = this.userService.signup(userDTO);
         return new ResponseEntity<>(userDTOResponse, HttpStatus.CREATED);
     }
 
