@@ -25,8 +25,12 @@ spring:
       port: ${REDIS_PORT:6379}
       host: ${REDIS_HOST:localhost}
 
+cache:
+  enabled: ${CACHE_ENABLED:true}
+  provider: ${CACHE_PROVIDER:memcached}
+
 messaging:
-  provider: ${MESSAGING_PROVIDER:kinesis}
+  provider: ${MESSAGING_PROVIDER:kafka}
   kafka:
     client-id: ${KAFKA_CLIENT_ID:user-service}
     topic: ${KAFKA_TOPIC:user}
@@ -38,16 +42,13 @@ messaging:
     endpoint-override: ${ENDPOINT_OVERRIDE:http://localhost:4566}
     async-native: ${KINESIS_ASYNC:false}
 
-
+common:
+  id-generator: ${ID_GENERATOR:nano_id}
 
 eureka:
   client:
     service-url:
       defaultZone: ${SERVER_DISCOVERY:http://localhost:8761/eureka}
-
-jwt:
-  secret: ${JWT_SECRET}
-  expiration: 300000
 
 security:
   enabled: ${SECURITY_ENABLED:false}
@@ -71,10 +72,6 @@ auth:
 service:
   general:
     protocol: http://
-
-cache:
-  enabled: ${CACHE_ENABLED:true}
-  provider: ${CACHE_PROVIDER:memcached}
 
 logging:
   level:

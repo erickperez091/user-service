@@ -2,7 +2,7 @@ package com.example.user_service.services;
 
 import com.example.common.configuration.WebClientFilter;
 import com.example.common.entity.EnumUtil;
-import com.example.common.utilities.IdUtil;
+import com.example.common.utilities.IdGeneratorService;
 import com.example.user_service.dto.LoginAttemptDTO;
 import com.example.user_service.entity.LoginAttempt;
 import com.example.user_service.repository.LoginAttemptRepository;
@@ -29,7 +29,7 @@ public class LoginAttemptService {
     private final LoginAttemptRepository loginAttemptRepository;
     private final UserRepository userRepository;
     private final WebClient.Builder webClientBuilder;
-    private final IdUtil idUtil;
+    private final IdGeneratorService IdGeneratorService;
 
     private WebClient webClient;
 
@@ -96,7 +96,7 @@ public class LoginAttemptService {
             }
         }, () -> {
             LoginAttempt loginAttempt = new LoginAttempt();
-            loginAttempt.setId(idUtil.generateId(EnumUtil.UUIDType.SHORT));
+            loginAttempt.setId(this.IdGeneratorService.generateId(EnumUtil.UUIDType.SHORT));
             loginAttempt.setUsername(loginAttemptDTO.username());
             loginAttempt.setAttempts(1);
             this.loginAttemptRepository.save(loginAttempt);
