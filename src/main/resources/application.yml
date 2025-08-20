@@ -28,6 +28,9 @@ spring:
 cache:
   enabled: ${CACHE_ENABLED:true}
   provider: ${CACHE_PROVIDER:memcached}
+  memcached:
+    host: ${MEMCACHED_HOST:localhost}
+    port: ${MEMCACHED_PORT:11211}
 
 messaging:
   provider: ${MESSAGING_PROVIDER:kafka}
