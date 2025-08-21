@@ -1,4 +1,4 @@
-package com.example.user_service.services;
+package com.example.user_service.services.impl;
 
 import com.example.user_service.entity.User;
 import com.example.user_service.repository.UserRepository;
@@ -15,6 +15,7 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class UserDetailServiceImpl implements UserDetailsService {
+
 
     private final UserRepository userRepository;
 

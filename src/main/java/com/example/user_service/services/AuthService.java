@@ -1,6 +1,6 @@
 package com.example.user_service.services;
 
-import com.example.common.service.CacheService;
+import com.example.common.service.cache.CacheService;
 import com.example.common.utilities.JwtUtils;
 import com.example.user_service.dto.LoginAttemptDTO;
 import com.example.user_service.dto.TokenResponseDTO;
@@ -22,56 +22,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-@Service
-@RequiredArgsConstructor
-@Log4j2
-public class AuthService {
 
-    private final UserRepository userRepository;
-    private final JwtUtils jwtUtils;
+public interface AuthService {
 
-    private final CacheService cacheService;
-    private final LoginAttemptService loginAttemptService;
-    private final AuthenticationManager authenticationManager;
+    TokenResponseDTO login(String username, String password, HttpServletRequest request);
 
-    public TokenResponseDTO login(String username, String password, HttpServletRequest request) {
-        try {
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
-            );
-            String isSessionActive = this.cacheService.isSessionActive(username);
-            if (Objects.nonNull(isSessionActive) && !this.cacheService.isTokenInBlackList(isSessionActive)) {
-                throw new SessionAlreadyActiveException("Session is active");
-            }
-            String role = auth.getAuthorities().stream()
-                    .findFirst()
-                    .map(GrantedAuthority::getAuthority)
-                    .orElse("USER");
-            String token = jwtUtils.generateToken(username, Map.of("role", role));
-            cacheService.storeActiveToken(username, token);
-            return new TokenResponseDTO(token);
-        } catch (BadCredentialsException | LockedException ex) {
-            request.setAttribute("username", username);
-            throw ex;
-        }
-    }
+    TokenResponseDTO refreshToken(String token);
 
-    public TokenResponseDTO refreshToken(String token) {
-        String username = jwtUtils.getUsername(token);
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        final StringBuilder refreshToken = new StringBuilder();
-        optionalUser.ifPresent(user -> {
-            refreshToken.append(jwtUtils.generateToken(username, Map.of("role", user.getRole())));
-        });
-        return new TokenResponseDTO(refreshToken.toString());
-    }
+    void logout(String token);
 
-    public void logout(String token) {
-        String tokenAux = token.substring(7);
-        this.cacheService.addTokenToBlackList(tokenAux);
-    }
-
-    public void updateLoginAttempt(LoginAttemptDTO loginAttemptDTO) {
-        this.loginAttemptService.updateLoginAttempt(loginAttemptDTO);
-    }
+    void updateLoginAttempt(LoginAttemptDTO loginAttemptDTO);
 }
