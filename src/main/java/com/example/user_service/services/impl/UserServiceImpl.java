@@ -7,6 +7,7 @@ import com.example.user_service.entity.User;
 import com.example.user_service.messaging.UserPublisher;
 import com.example.user_service.repository.UserRepository;
 import com.example.user_service.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,13 +28,13 @@ public class UserServiceImpl implements UserService {
     private final ConverterUtil converterUtil;
     private final UserPublisher userPublisher;
 
-    public UserDTO signup(UserDTO userDTO) {
+    public UserDTO signup(UserDTO userDTO, HttpServletRequest request) {
         Optional<User> optionalUser = userRepository.findByUsername(userDTO.getUsername());
         optionalUser.ifPresentOrElse(user -> {
-            throw new DuplicateKeyException("Username is already in use");
+            request.setAttribute("username", userDTO.getUsername());
+            throw new DuplicateKeyException(String.format("User [%s] already exists", userDTO.getUsername()));
         }, () -> {
-            userDTO.setId(UUID.randomUUID().toString());
-            userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+            userDTO.setId(UUID.randomUUID().toString());;
             Map<String, Object> userData = converterUtil.objectToMap(userDTO);
             MessageEvent event = new MessageEvent(CREATE_USER, userData);
             this.userPublisher.sendEvent(event);

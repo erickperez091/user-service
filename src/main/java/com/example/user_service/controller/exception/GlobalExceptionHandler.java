@@ -5,13 +5,18 @@ import com.example.user_service.services.LoginAttemptService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -48,5 +53,33 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.LOCKED)
                 .body(Map.of("error", message));
+    }
+
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity<?> handleDuplicateUsername(DuplicateKeyException ex, HttpServletRequest request) {
+        String username = (String) request.getAttribute("username");
+        logger.error("[GlobalExceptionHandler][handleDuplicateUsername][Start]: User already exists: {}", username);
+        String message = String.format(ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("error", message));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleMethodArgumentNotValid(MethodArgumentNotValidException ex){
+
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<?> handleUsernameNotFound(UsernameNotFoundException ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
     }
 }

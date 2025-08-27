@@ -1,5 +1,6 @@
 server:
   port: 9082
+
 spring:
   application:
     name: user-service
@@ -25,12 +26,10 @@ spring:
       port: ${REDIS_PORT:6379}
       host: ${REDIS_HOST:localhost}
 
-cache:
-  enabled: ${CACHE_ENABLED:true}
-  provider: ${CACHE_PROVIDER:memcached}
-  memcached:
-    host: ${MEMCACHED_HOST:localhost}
-    port: ${MEMCACHED_PORT:11211}
+eureka:
+  client:
+    service-url:
+      defaultZone: ${SERVER_DISCOVERY:http://localhost:8761/eureka}
 
 messaging:
   provider: ${MESSAGING_PROVIDER:kafka}
@@ -43,18 +42,15 @@ messaging:
     stream-name: ${KINESIS_STREAM_NAME:user}
     region: ${KINESIS_REGION:us-east-1}
     endpoint-override: ${ENDPOINT_OVERRIDE:http://localhost:4566}
-    async-native: ${KINESIS_ASYNC:false}
-
-common:
-  id-generator: ${ID_GENERATOR:nano_id}
-
-eureka:
-  client:
-    service-url:
-      defaultZone: ${SERVER_DISCOVERY:http://localhost:8761/eureka}
+    async-native: ${KINESIS_ASYNC:true}
+    initial-position: TRIM_HORIZON
 
 security:
   enabled: ${SECURITY_ENABLED:false}
+  firebase:
+    enabled: ${SECURITY_FIREBASE_ENABLED:true}
+    api:
+      key: ${FIREBASE_API_KEY:AIzaSyDGxxb5uJs7YJd_dsWjGBLwExaoBAXF0SQ}
   jwt:
     secret: ${JWT_SECRET}
     expiration: 300000
@@ -65,6 +61,16 @@ security:
       key: ${SECURITY_INTERNAL_API_KEY:e8Jh1Ejk2gFv4nKz6Yf8WvLtBqZo0v+z0lLh9cPeqvU=}
   max:
     attempts: ${MAX_ATTEMPTS:3}
+
+cache:
+  enabled: ${CACHE_ENABLED:true}
+  provider: ${CACHE_PROVIDER:memcached}
+  memcached:
+    host: ${MEMCACHED_HOST:localhost}
+    port: ${MEMCACHED_PORT:11211}
+
+common:
+  id-generator: ${ID_GENERATOR:nano_id}
 
 auth:
   service:
@@ -80,3 +86,6 @@ logging:
   level:
     org.springframework.security: DEBUG
     org.springframework.security.web: DEBUG
+    software.amazon.kinesis: DEBUG
+    software.amazon.kinesis.coordinator: DEBUG
+    software.amazon.kinesis.retrieval: DEBUG

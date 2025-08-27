@@ -12,12 +12,14 @@ import com.example.user_service.services.LoginAttemptService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -33,11 +35,11 @@ public class AuthServiceImpl implements AuthService {
 
     private final CacheService cacheService;
     private final LoginAttemptService loginAttemptService;
+    @Qualifier(value = "customAuthenticationManager")
     private final AuthenticationManager authenticationManager;
 
     public TokenResponseDTO login(String username, String password, HttpServletRequest request) {
         try {
-            // TODO: Migrate authentication to Firebase using username and password
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password)
             );
@@ -52,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
             String token = jwtUtils.generateToken(username, Map.of("role", role));
             cacheService.storeActiveToken(username, token);
             return new TokenResponseDTO(token);
-        } catch (BadCredentialsException | LockedException ex) {
+        } catch (BadCredentialsException | LockedException | UsernameNotFoundException ex) {
             request.setAttribute("username", username);
             throw ex;
         }

@@ -1,4 +1,4 @@
-package com.example.user_service.configuration;
+package com.example.user_service.configuration.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
