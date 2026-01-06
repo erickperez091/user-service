@@ -51,7 +51,8 @@ public class AuthServiceImpl implements AuthService {
                     .findFirst()
                     .map(GrantedAuthority::getAuthority)
                     .orElse("USER");
-            String token = jwtUtils.generateToken(username, Map.of("role", role));
+            String token = this.jwtUtils.generateToken(username, Map.of("role", role));
+            String refreshToken = this.jwtUtils.generateRefreshToken(username);
             cacheService.storeActiveToken(username, token);
             return new TokenResponseDTO(token);
         } catch (BadCredentialsException | LockedException | UsernameNotFoundException ex) {
