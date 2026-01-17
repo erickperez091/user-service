@@ -4,6 +4,7 @@ import com.example.common.entity.MessageEvent;
 import com.example.common.utilities.ConverterUtil;
 import com.example.user_service.dto.UserDTO;
 import com.example.user_service.entity.User;
+import com.example.user_service.messaging.TestPublisherV2;
 import com.example.user_service.messaging.UserPublisher;
 import com.example.user_service.repository.UserRepository;
 import com.example.user_service.services.UserService;
@@ -26,7 +27,9 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final ConverterUtil converterUtil;
+    //private final UserPublisher userPublisher;
     private final UserPublisher userPublisher;
+    private final TestPublisherV2 testPublisherV2;
 
     public UserDTO signup(UserDTO userDTO, HttpServletRequest request) {
         Optional<User> optionalUser = userRepository.findByUsername(userDTO.getUsername());
@@ -38,6 +41,8 @@ public class UserServiceImpl implements UserService {
             Map<String, Object> userData = converterUtil.objectToMap(userDTO);
             MessageEvent event = new MessageEvent(CREATE_USER, userData);
             this.userPublisher.sendEvent(event);
+            this.testPublisherV2.sendEvent();
+            //this.userPublisher.sendEvent(event);
             userDTO.setPassword("");
         });
         return userDTO;
