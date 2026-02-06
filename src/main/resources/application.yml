@@ -32,7 +32,10 @@ eureka:
       defaultZone: ${SERVER_DISCOVERY:http://localhost:8761/eureka}
 
 messaging:
-  provider: ${MESSAGING_PROVIDER:kafka}
+  provider: ${MESSAGING_PROVIDER:kinesis}
+  destination:
+    user: ${MESSAGING_DESTINATION_USER:user}
+    test: ${MESSAGING_DESTINATION_TEST:test}
   kafka:
     client-id: ${KAFKA_CLIENT_ID:user-service}
     topic: ${KAFKA_TOPIC:user}

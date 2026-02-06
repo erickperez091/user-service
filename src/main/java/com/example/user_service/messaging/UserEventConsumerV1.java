@@ -1,7 +1,7 @@
 package com.example.user_service.messaging;
 
 import com.example.common.entity.MessageEvent;
-import com.example.common.service.messaging.MessagingConsumer;
+import com.example.common.service.messaging.MessagingCosumerV1;
 import com.example.common.utilities.ConverterUtil;
 import com.example.user_service.entity.User;
 import com.example.user_service.services.CloudAuthService;
@@ -9,25 +9,15 @@ import com.example.user_service.services.UserProcessor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang.NotImplementedException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 @Log4j2
-public class UserEventConsumer implements MessagingConsumer {
+public class UserEventConsumerV1 implements MessagingCosumerV1 {
 
     private final UserProcessor userProcessor;
     private final ConverterUtil converterUtil;
     private final CloudAuthService cloudAuthService;
-
-    @Value("${messaging.destination.user}")
-    private String destination;
-
-    @Override
-    public String destination() {
-        return this.destination;
-    }
 
     @Override
     public void consume(MessageEvent messageEvent) {
