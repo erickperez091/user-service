@@ -30,12 +30,15 @@ pipeline {
         stage('Read version from POM') {
             steps {
                 script {
-                    def version = sh(
-                        script: "mvn -q -Dexec.executable=echo -Dexec.args='\\${project.version}' --non-recursive exec:exec",
+                    env.PROJECT_VERSION = sh(
+                        script: '''
+                            mvn -q -DforceStdout \
+                                -Dexpression=project.version \
+                                help:evaluate
+                        ''',
                         returnStdout: true
                     ).trim()
 
-                    env.PROJECT_VERSION = version
                     echo "Detected version: ${env.PROJECT_VERSION}"
                 }
             }
@@ -49,25 +52,26 @@ pipeline {
                         variable: 'MAVEN_SETTINGS'
                     )
                 ]) {
-                    sh """
-                        mvn clean deploy \
-                          -s $MAVEN_SETTINGS \
-                          -DskipTests \
-                          -DallowInsecureProtocol=true
-                    """
+                    sh '''
+                        mvn -s $MAVEN_SETTINGS \
+                            clean deploy \
+                            -DskipTests \
+                            -DallowInsecureProtocol=true \
+                            -U
+                    '''
                 }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh """
+                sh '''
                     docker build \
-                      --build-arg JAR_FILE=target/user-service-${env.PROJECT_VERSION}.jar \
-                      -t ${DOCKER_IMAGE}:${env.PROJECT_VERSION} \
+                      --build-arg JAR_FILE=target/user-service-${PROJECT_VERSION}.jar \
+                      -t ${DOCKER_IMAGE}:${PROJECT_VERSION} \
                       -t ${DOCKER_IMAGE}:latest \
-                      -f Dockerfile .
-                """
+                      .
+                '''
             }
         }
 
@@ -77,14 +81,14 @@ pipeline {
                     usernamePassword(
                         credentialsId: 'dockerhub-credentials',
                         usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
+                        passwordVariable: 'DOCKER_TOKEN'
                     )
                 ]) {
-                    sh """
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push ${DOCKER_IMAGE}:${env.PROJECT_VERSION}
+                    sh '''
+                        echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push ${DOCKER_IMAGE}:${PROJECT_VERSION}
                         docker push ${DOCKER_IMAGE}:latest
-                    """
+                    '''
                 }
             }
         }
@@ -96,6 +100,9 @@ pipeline {
         }
         failure {
             echo "FAILED → ${params.BRANCH_NAME}"
+        }
+        always {
+            sh 'docker logout || true'
         }
     }
 }
