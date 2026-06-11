@@ -28,8 +28,6 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserService userService;
-    @Value("${security.internal.api.key}")
-    private String key;
 
     @PostMapping(name = "Sign Up", value = "/signup", path = "/signup", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDTO> signup(@Valid @RequestBody UserDTO userDTO, HttpServletRequest request) {
@@ -60,10 +58,7 @@ public class AuthController {
     @PostMapping(name = "Login Attempt", value = "/login-attempt", path = "/login-attempt", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> loginAttempt(@RequestHeader("X-Internal-Key") String internalKey, @RequestBody LoginAttemptDTO loginAttemptDTO) {
         logger.info("[AuthController][loginAttempt][Start] Internal Api Key {}", internalKey);
-        if (!key.equals(internalKey)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        this.authService.updateLoginAttempt(loginAttemptDTO);
+        this.authService.updateLoginAttempt(loginAttemptDTO, internalKey);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

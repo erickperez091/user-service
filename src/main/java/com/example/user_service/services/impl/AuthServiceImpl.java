@@ -76,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
         this.cacheService.addTokenToBlackList(tokenAux);
     }
 
-    public void updateLoginAttempt(LoginAttemptDTO loginAttemptDTO) {
-        this.loginAttemptService.updateLoginAttempt(loginAttemptDTO);
+    public void updateLoginAttempt(LoginAttemptDTO loginAttemptDTO, String loginAttemptId) {
+        this.loginAttemptService.updateLoginAttempt(loginAttemptDTO, loginAttemptId);
     }
 }

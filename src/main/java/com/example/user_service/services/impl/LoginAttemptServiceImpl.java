@@ -2,6 +2,8 @@ package com.example.user_service.services.impl;
 
 import com.example.common.configuration.WebClientFilter;
 import com.example.common.entity.EnumUtil;
+import com.example.common.exceptions.LoginAttemptExpiredException;
+import com.example.common.service.cache.CacheService;
 import com.example.common.utilities.IdGeneratorService;
 import com.example.user_service.dto.LoginAttemptDTO;
 import com.example.user_service.entity.LoginAttempt;
@@ -30,6 +32,7 @@ public class LoginAttemptServiceImpl implements LoginAttemptService {
     private final UserRepository userRepository;
     private final WebClient.Builder webClientBuilder;
     private final IdGeneratorService IdGeneratorService;
+    private final CacheService cacheService;
 
     private WebClient webClient;
 
@@ -45,8 +48,6 @@ public class LoginAttemptServiceImpl implements LoginAttemptService {
     @Value("${auth.service.login-attempt-url}")
     private String loginAttemptsUrl;
 
-    @Value("${security.internal.api.key}")
-    private String internalKey;
     @Value("${security.max.attempts}")
     private int maxAttempts;
 
@@ -71,9 +72,10 @@ public class LoginAttemptServiceImpl implements LoginAttemptService {
 
     public void callUpdateLogingAttempt(String username) {
         LoginAttemptDTO loginAttemptDTO = new LoginAttemptDTO(username);
+        String loggingAttemptId = this.cacheService.updateLoginAttempt(username);
         this.webClient.post()
                 .uri(this.loginAttemptsUrl)
-                .header("X-Internal-Key", internalKey)
+                .header("X-Internal-Key", loggingAttemptId)
                 .body(BodyInserters.fromValue(loginAttemptDTO))
                 .retrieve()
                 .toBodilessEntity()
@@ -81,26 +83,33 @@ public class LoginAttemptServiceImpl implements LoginAttemptService {
     }
 
 
-    public void updateLoginAttempt(LoginAttemptDTO loginAttemptDTO) {
-        Optional<LoginAttempt> loginAttemptOptional = this.loginAttemptRepository.findLoginAttemptByUsername(loginAttemptDTO.username());
+    public void updateLoginAttempt(LoginAttemptDTO loginAttemptDTO, String loginAttemptId) {
 
-        loginAttemptOptional.ifPresentOrElse(loginAttempt -> {
-            loginAttempt.setAttempts(loginAttempt.getAttempts() + 1);
-            this.loginAttemptRepository.save(loginAttempt);
-            if (loginAttempt.getAttempts() >= this.maxAttempts) {
-                Optional<com.example.user_service.entity.User> userOptional = this.userRepository.findByUsername(loginAttemptDTO.username());
-                userOptional.ifPresent(user -> {
-                    user.setAccountNonLocked(false);
-                    this.userRepository.save(user);
-                    this.loginAttemptRepository.deleteById(loginAttempt.getId());
-                });
-            }
+        Optional<String> loginAttemptIdOptional = Optional.ofNullable(this.cacheService.isLoginAttemptExpired(loginAttemptId));
+
+        loginAttemptIdOptional.ifPresentOrElse((loginAttempId) -> {
+            Optional<LoginAttempt> loginAttemptOptional = this.loginAttemptRepository.findLoginAttemptByUsername(loginAttemptDTO.username());
+
+            loginAttemptOptional.ifPresentOrElse(loginAttempt -> {
+                loginAttempt.setAttempts(loginAttempt.getAttempts() + 1);
+                this.loginAttemptRepository.save(loginAttempt);
+                if (loginAttempt.getAttempts() >= this.maxAttempts) {
+                    Optional<com.example.user_service.entity.User> userOptional = this.userRepository.findByUsername(loginAttemptDTO.username());
+                    userOptional.ifPresent(user -> {
+                        user.setAccountNonLocked(false);
+                        this.userRepository.save(user);
+                        this.loginAttemptRepository.deleteById(loginAttempt.getId());
+                    });
+                }
+            }, () -> {
+                LoginAttempt loginAttempt = new LoginAttempt();
+                loginAttempt.setId(this.IdGeneratorService.generateId(EnumUtil.UUIDType.SHORT));
+                loginAttempt.setUsername(loginAttemptDTO.username());
+                loginAttempt.setAttempts(1);
+                this.loginAttemptRepository.save(loginAttempt);
+            });
         }, () -> {
-            LoginAttempt loginAttempt = new LoginAttempt();
-            loginAttempt.setId(this.IdGeneratorService.generateId(EnumUtil.UUIDType.SHORT));
-            loginAttempt.setUsername(loginAttemptDTO.username());
-            loginAttempt.setAttempts(1);
-            this.loginAttemptRepository.save(loginAttempt);
+            throw new LoginAttemptExpiredException("Login Attempt Token Id Expired");
         });
     }
 }

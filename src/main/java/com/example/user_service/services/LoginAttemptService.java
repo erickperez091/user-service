@@ -6,5 +6,5 @@ public interface LoginAttemptService {
 
     void callUpdateLogingAttempt(String username);
 
-    void updateLoginAttempt(LoginAttemptDTO loginAttemptDTO);
+    void updateLoginAttempt(LoginAttemptDTO loginAttemptDTO, String loginAttemptId);
 }

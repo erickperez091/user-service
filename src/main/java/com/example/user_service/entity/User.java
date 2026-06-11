@@ -25,7 +25,7 @@ public class User {
     @Column(name = "username", unique = true)
     private String username;
 
-    @Column(name = "password", unique = true)
+    @Column(name = "password")
     private String password;
 
     @Column(name = "accountNonLocked", columnDefinition = "boolean default true")
@@ -35,6 +35,6 @@ public class User {
     @Column(name = "role")
     private RoleEnum role;
 
-    @Column(name = "createdBy", updatable = false )
+    @Column(name = "createdBy", updatable = false)
     private String createdBy;
 }

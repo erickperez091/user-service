@@ -13,5 +13,5 @@ public interface AuthService {
 
     void logout(String token);
 
-    void updateLoginAttempt(LoginAttemptDTO loginAttemptDTO);
+    void updateLoginAttempt(LoginAttemptDTO loginAttemptDTO, String loginAttemptId);
 }

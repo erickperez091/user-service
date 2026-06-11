@@ -1,5 +1,6 @@
 package com.example.user_service.controller.exception;
 
+import com.example.common.exceptions.LoginAttemptExpiredException;
 import com.example.user_service.exception.SessionAlreadyActiveException;
 import com.example.user_service.services.LoginAttemptService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -81,5 +82,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<?> handleUsernameNotFound(UsernameNotFoundException ex){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(LoginAttemptExpiredException.class)
+    public ResponseEntity<?> handleLoginAttemptExpired(LoginAttemptExpiredException ex) {
+        String message = ex.getMessage();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", message));
     }
 }

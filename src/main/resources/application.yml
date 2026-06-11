@@ -25,6 +25,8 @@ spring:
     redis:
       port: ${REDIS_PORT:6379}
       host: ${REDIS_HOST:localhost}
+  pulsar:
+    service-url: ${PULSAR_HOST:pulsar://localhost:6650}
 
 eureka:
   client:
@@ -32,7 +34,7 @@ eureka:
       defaultZone: ${SERVER_DISCOVERY:http://localhost:8761/eureka}
 
 messaging:
-  provider: ${MESSAGING_PROVIDER:kinesis}
+  provider: ${MESSAGING_PROVIDER:kafka}
   destination:
     user: ${MESSAGING_DESTINATION_USER:user}
     test: ${MESSAGING_DESTINATION_TEST:test}
@@ -47,11 +49,13 @@ messaging:
     endpoint-override: ${ENDPOINT_OVERRIDE:http://localhost:4566}
     async-native: ${KINESIS_ASYNC:true}
     initial-position: TRIM_HORIZON
+  pulsar:
+    subscription-name: ${PULSAR_SUBSCRIPTION_NAME:user-service}
 
 security:
   enabled: ${SECURITY_ENABLED:false}
   firebase:
-    enabled: ${SECURITY_FIREBASE_ENABLED:true}
+    enabled: ${SECURITY_FIREBASE_ENABLED:false}
     api:
       key: ${FIREBASE_API_KEY:}
   jwt:
@@ -59,9 +63,6 @@ security:
     expiration: 30000
   public:
     url: "/auth/v1/**"
-  internal:
-    api:
-      key: ${SECURITY_INTERNAL_API_KEY:e8Jh1Ejk2gFv4nKz6Yf8WvLtBqZo0v+z0lLh9cPeqvU=}
   max:
     attempts: ${MAX_ATTEMPTS:3}
 
@@ -73,7 +74,7 @@ cache:
     port: ${MEMCACHED_PORT:11211}
 
 common:
-  id-generator: ${ID_GENERATOR:nano_id}
+  id-generator: ${ID_GENERATOR:ulid_id}
 
 auth:
   service:
