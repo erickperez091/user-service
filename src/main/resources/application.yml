@@ -59,8 +59,8 @@ security:
     api:
       key: ${FIREBASE_API_KEY:}
   jwt:
-    secret: ${JWT_SECRET}
-    expiration: 30000
+    secret: ${JWT_SECRET:}
+    expiration: ${JWT_EXPIRATION:900000}
   public:
     url: "/auth/v1/**"
   max:
