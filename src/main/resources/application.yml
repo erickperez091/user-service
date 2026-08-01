@@ -93,3 +93,21 @@ logging:
     software.amazon.kinesis: DEBUG
     software.amazon.kinesis.coordinator: DEBUG
     software.amazon.kinesis.retrieval: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
