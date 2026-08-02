@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/user/v1")
+@RequestMapping("/user")
 @Log4j2
 public class CustomUserController {
 

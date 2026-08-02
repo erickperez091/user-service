@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/auth/v1")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 @Log4j2
 public class AuthController {

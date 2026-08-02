@@ -62,7 +62,7 @@ security:
     secret: ${JWT_SECRET:}
     expiration: ${JWT_EXPIRATION:900000}
   public:
-    url: "/auth/v1/**"
+    url: "${SECURITY_PUBLIC_URL:/auth/v1/**}"
   max:
     attempts: ${MAX_ATTEMPTS:3}
 
